@@ -1,0 +1,33 @@
+{
+    "name": "xbnz/google-gemini-api",
+    "description": "HTTP client for accessing Google's AI models",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "A G",
+            "email": "fdwnct@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "XbNz\\Gemini\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "XbNz\\Gemini\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "azjezz/psl": "^2.9"
+    },
+    "require-dev": {
+        "pestphp/pest": "^2.3",
+        "phpstan/phpstan": "^1.1",
+        "phpstan/extension-installer": "^1.3",
+        "laravel/pint": "^1.1"
+    }
+}
