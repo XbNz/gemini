@@ -1,0 +1,51 @@
+{
+  "source": {
+    "directories": [
+      "src"
+    ],
+    "excludes": [
+      "Config",
+      "Folder/with/File.php",
+      "/\\.interface\\.php/",
+      "{Infrastructure/.*}"
+    ]
+  },
+  "timeout": 100,
+  "logs": {
+    "html": "infection.html",
+    "summary": "infection-summary.log",
+    "perMutator": "per-mutator.md",
+    "github": true,
+    "stryker": {
+      "badge": "/^release-.*$/"
+    }
+  },
+  "tmpDir": "",
+  "phpUnit": {
+    "configDir": "",
+    "customPath": ""
+  },
+  "mutators": {
+    "global-ignore": [
+      "FooClass::__construct"
+    ],
+    "global-ignoreSourceCodeByRegex": [
+      "Assert::.*"
+    ],
+    "@default": true,
+    "@function_signature": false,
+    "TrueValue": {
+      "ignore": [
+        "NameSpace\\*\\Class::method"
+      ],
+      "ignoreSourceCodeByRegex": [
+        "\\$this->logger.*"
+      ]
+    }
+  },
+  "testFramework": "pest",
+  "bootstrap":"",
+  "initialTestsPhpOptions": "",
+  "testFrameworkOptions": ""
+}
+
