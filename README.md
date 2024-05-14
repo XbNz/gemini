@@ -130,4 +130,53 @@ class AppServiceProvider extends ServiceProvider
 ```
 
 > [!WARNING]
-> When using persistent processes such as Laravel Octane, pay attention to the register the singleton properly so that it does not persist across requests. This may lead to token expiration issues.
+> When using persistent processes such as Laravel Octane, pay attention to register the singleton properly so that it does not persist across requests. This may lead to token expiration issues.
+
+## Testing
+This library provides fake implementations for testing purposes. For example, you may use the `GoogleOAuth2ServiceFake::class` like so:
+### Calling code
+```php
+// Laravel example
+namespace App\Http\Commands;
+
+use XbNz\Gemini\OAuth2\GoogleOAuth2Interface;
+
+class SomeCommand
+{
+    public function __construct(
+        private readonly GoogleOAuth2Interface $googleOAuth2Service
+    ) {}
+
+    public function handle(): void
+    {
+        $response = $this->googleOAuth2Service->token(...);
+    }
+}
+```
+
+### Test code
+
+```php
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use XbNz\Gemini\OAuth2\DataTransferObjects\Requests\TokenRequestDTO;
+use XbNz\Gemini\OAuth2\GoogleOAuth2ServiceFake;
+
+class SomeCommandTest extends TestCase
+{
+    public function test_it_works(): void
+    {
+        $this->app->swap(GoogleOAuth2Interface::class, $fake = new GoogleOAuth2ServiceFake);
+        
+        // Basic testing helpers
+        $fake->alwaysReturnToken(...);
+        $fake->assertTokenRequestCount(...);
+        
+        // Asserting against requests
+        $fake->assertTokenRequest(function (TokenRequestDTO) {
+            return $dto->grantType === 'urn:ietf:params:oauth:grant-type:jwt-bearer';
+        });
+    }
+}
+```

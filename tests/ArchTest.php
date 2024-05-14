@@ -8,5 +8,9 @@ test('no usage of dump or dd')
     ->toBeUsed();
 
 test('strict types declaration')
-    ->expect('XbNz\Gemini')
+    ->expect('XbNz\Gemini\OAuth2\Saloon\Requests')
     ->toUseStrictTypes();
+
+//test('classes are final')
+//    ->expect('XbNz\Gemini')
+//    ->toBeFinal();

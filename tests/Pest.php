@@ -13,7 +13,9 @@ declare(strict_types=1);
 |
 */
 
-//uses(Tests\TestCase::class)->in('Feature');
+use XbNz\Gemini\Tests\TestCase;
+
+uses(TestCase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
