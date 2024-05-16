@@ -63,7 +63,7 @@ clsss AppServiceProvider extends ServiceProvider
 
 ### Using the AIPlatform service
 ```php
-namespace App\Http\Commands;
+namespace App\Console\Commands;
 
 use XbNz\Gemini\AIPlatform\AIPlatformInterface;
 
@@ -137,7 +137,7 @@ This library provides fake implementations for testing purposes. For example, yo
 ### Calling code
 ```php
 // Laravel example
-namespace App\Http\Commands;
+namespace App\Console\Commands;
 
 use XbNz\Gemini\OAuth2\GoogleOAuth2Interface;
 
@@ -167,6 +167,7 @@ class SomeCommandTest extends TestCase
 {
     public function test_it_works(): void
     {
+        // Swapping the real service with the fake one in the Laravel container
         $this->app->swap(GoogleOAuth2Interface::class, $fake = new GoogleOAuth2ServiceFake);
         
         // Basic testing helpers
