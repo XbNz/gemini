@@ -46,7 +46,7 @@ final readonly class GenerateContentRequestDTO
             ])->toArray(),
             'system_instruction' => [
                 'parts' => $this->systemInstructions->map(fn (PartContract $part) => $part->toPartArray())->toArray(),
-            ]
+            ],
         ];
     }
 }
