@@ -16,8 +16,13 @@ final readonly class TextPart implements PartContract
     ) {
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toPartArray(): array
     {
-        // TODO: Implement toPartArray() method.
+        return [
+            'text' => $this->text,
+        ];
     }
 }

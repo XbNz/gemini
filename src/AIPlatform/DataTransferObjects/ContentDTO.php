@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace XbNz\Gemini\AIPlatform\DataTransferObjects;
 
-use XbNz\Gemini\AIPlatform\Collections\PartCollection;
+use Illuminate\Support\Collection;
+use XbNz\Gemini\AIPlatform\Contracts\PartContract;
 use XbNz\Gemini\AIPlatform\Enums\Role;
-use XbNz\Gemini\AIPlatform\ValueObjects\TextPart;
 
 final readonly class ContentDTO
 {
     /**
-     * @param  PartCollection<int, TextPart>  $parts
+     * @param  Collection<int, PartContract>  $parts
      */
     public function __construct(
         public Role $role,
-        public PartCollection $parts
+        public Collection $parts
     ) {
     }
 }

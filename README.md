@@ -109,28 +109,38 @@ class AppServiceProvider extends ServiceProvider
 
 ### Bearer token authentication
 The provided `GoogleOAuthInterface::token()` method allows you to fetch a new token for bearer authentication. Do keep in mind that if you use this tool for authenticating the AIPlatform, the process generates a new token every time the method is called which may or may not be desirable.
-#### Use your service container's singleton to prevent multiple token requests
+ #### Caching your token until expiry (Laravel example)
+This package does not provide a caching mechanism – for example using the PSR cache interface – due to the dead simple cache integration of most modern frameworks. Here is a Laravel example:
+
 ```php
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Cache\Repository;use Illuminate\Support\ServiceProvider;use Saloon\Http\Auth\TokenAuthenticator;use XbNz\Gemini\AIPlatform\Contracts\GoogleAIPlatformInterface;use XbNz\Gemini\AIPlatform\GoogleAIPlatformService;use XbNz\Gemini\AIPlatform\Saloon\Connectors\GoogleAIPlatformConnector;use XbNz\Gemini\OAuth2\DataTransferObjects\Requests\TokenRequestDTO;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(GoogleOAuth2Interface::class, function (Application $app) {
-            return new GoogleOAuth2Service(
-                new GoogleOAuthConnector
+        $this->app->bind(GoogleAIPlatformInterface::class, function (Application $app) {
+            return new GoogleAIPlatformService(
+                new GoogleAIPlatformConnector->authenticator(
+                    new TokenAuthenticator(
+                        $app->make(Repository::class)->remember('google_aiplatform_token', 3600, function () use ($app) {
+                            return $app->make(GoogleOAuth2Interface::class)->token(
+                                new TokenRequestDTO(
+                                    ...
+                                    // Ensure the expiry matches the cache duration
+                                )
+                            );
+                        })
+                    )
+                )
                 $app->make(LoggerInterface::class)
             );
         });
     }
 }
 ```
-
-> [!WARNING]
-> When using persistent processes such as Laravel Octane, pay attention to register the singleton properly so that it does not persist across requests. This may lead to token expiration issues.
 
 ## Testing
 This library provides fake implementations for testing purposes. For example, you may use the `GoogleOAuth2ServiceFake::class` like so:
