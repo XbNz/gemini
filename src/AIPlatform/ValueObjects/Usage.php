@@ -11,13 +11,13 @@ final readonly class Usage
 {
     /**
      * @param  positive-int  $promptTokenCount
-     * @param  positive-int  $candidatesTokenCount
      * @param  positive-int  $totalTokenCount
+     * @param  positive-int|null  $candidatesTokenCount
      */
     public function __construct(
         public int $promptTokenCount,
-        public int $candidatesTokenCount,
         public int $totalTokenCount,
+        public ?int $candidatesTokenCount,
     ) {
     }
 }

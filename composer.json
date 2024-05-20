@@ -27,7 +27,9 @@
         "symfony/dotenv": "^7.0",
         "symfony/var-dumper": "^7.0",
         "nunomaduro/collision": "^8.1",
-        "colinodell/psr-testlogger": "^1.3"
+        "colinodell/psr-testlogger": "^1.3",
+        "fakerphp/faker": "^1.23",
+        "pestphp/pest-plugin-faker": "^2.0"
     },
     "autoload": {
         "psr-4": {

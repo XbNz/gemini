@@ -29,24 +29,4 @@ final readonly class GenerateContentRequestDTO
         public ?GenerationConfig $generationConfig = null,
     ) {
     }
-
-    public function normalize(): array
-    {
-        return [
-            'model' => $this->model,
-            'contents' => $this->contents->map(function (ContentDTO $contentDTO) {
-                return [
-                    'role' => $contentDTO->role->value,
-                    'parts' => $contentDTO->parts->map(fn (PartContract $part) => $part->toPartArray()),
-                ];
-            })->toArray(),
-            'safety_settings' => $this->safetySettings->map(fn (SafetySettings $safetySettings) => [
-                'category' => $safetySettings->harmCategory->value,
-                'threshold' => $safetySettings->safetyThreshold->value,
-            ])->toArray(),
-            'system_instruction' => [
-                'parts' => $this->systemInstructions->map(fn (PartContract $part) => $part->toPartArray())->toArray(),
-            ]
-        ];
-    }
 }

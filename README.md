@@ -142,6 +142,68 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
+### Logging and exception handling
+
+### Providing your own PSR-compatible logger
+This library uses the PSR logger interface for logging. You may provide your own logger by passing it to the constructor of the service:
+
+```php
+namespace App\Console\Commands;
+
+use XbNz\Gemini\AIPlatform\Exceptions\GoogleAIPlatformException;class SomeCommand
+{
+    public function handle(): void
+    {
+        $service = new AIPlatformService(
+            new AIPlatformConnector,
+            new MyCustomLogger
+        );
+        
+        try {
+            $response = $service->generateContent(...);
+        } catch (GoogleAIPlatformException $e) {
+            // Handle the exception
+        }
+        
+        // At this point, the logger will have logged the exception
+    }
+}
+````
+The same functionality exists on the OAuth2 service.
+
+### Lifecycle hooks for requests and responses
+This is not recommended for basic use cases. However, APIs change and maintainers are lazy. If Google adds a new field to a response which I cannot work on, you are free to hook into the response and create your own DTOs if you don't want to make a PR.
+
+```php
+namespace App\Console\Commands;
+
+use Saloon\Http\Request;
+use Saloon\Http\Response;
+use XbNz\Gemini\AIPlatform\Contracts\GoogleAIPlatformInterface;
+
+class SomeCommand
+{
+    public function __construct(
+        private readonly GoogleAIPlatformInterface $aiPlatform
+    ) {}
+
+    public function handle(): void
+    {
+        $this->aiPlatform->generateContent(
+            requestDto: ...,
+            beforeRequest: function (Request $request) {
+                $request->headers()->merge([
+                    'X-Custom-Header' => 'Value'
+                ]);
+            },
+            afterResponse: function (Response $response) {
+                // Return your own DTO or do something with the response
+            }
+        )
+    }
+}
+````
+
 ## Testing
 This library provides fake implementations for testing purposes. For example, you may use the `GoogleOAuth2ServiceFake::class` like so:
 ### Calling code
@@ -191,3 +253,6 @@ class SomeCommandTest extends TestCase
     }
 }
 ```
+
+> [!NOTE]
+> The same concept can be applied to the AIPlatform service. The fake implementation is called `GoogleAIPlatformServiceFake::class`
