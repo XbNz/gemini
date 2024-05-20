@@ -109,7 +109,6 @@ test('it can hit the real endpoint and return a dto', function (): void {
         ])
     );
 
-
     $service = new GoogleAIPlatformService(
         $connector
     );

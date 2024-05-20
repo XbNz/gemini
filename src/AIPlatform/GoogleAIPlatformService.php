@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Saloon\Exceptions\SaloonException;
-use Saloon\Http\Response;
 use XbNz\Gemini\AIPlatform\Contracts\GoogleAIPlatformInterface;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\ContentDTO;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\Requests\GenerateContentRequestDTO;
