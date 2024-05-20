@@ -14,6 +14,9 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         (new Provider())->register();
-        (new Dotenv())->load(__DIR__.'/../.env.testing');
+
+        if (file_exists(__DIR__.'/../.env.testing')) {
+            (new Dotenv())->load(__DIR__.'/../.env.testing');
+        }
     }
 }
