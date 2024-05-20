@@ -20,10 +20,6 @@ final class GoogleOAuth2ServiceFake implements GoogleOAuth2Interface
      */
     private array $tokenRequests = [];
 
-    public function __construct()
-    {
-    }
-
     public function token(
         TokenRequestDTO $tokenRequestDTO
     ): TokenResponseDTO {

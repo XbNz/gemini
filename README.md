@@ -212,7 +212,6 @@ A Guzzle retry middleware is not provided. You may implement your own or use a l
 composer require caseyamcl/guzzle_retry_middleware
 ```
 
-
 ```php
 namespace App\Providers;
 
