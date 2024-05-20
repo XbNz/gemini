@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use ColinODell\PsrTestLogger\TestLogger;
 use CuyZ\Valinor\Mapper\Source\Source;
 use CuyZ\Valinor\MapperBuilder;
+use GuzzleRetry\GuzzleRetryMiddleware;
 use Illuminate\Support\Collection;
 use Saloon\Exceptions\SaloonException;
 use Saloon\Http\Auth\TokenAuthenticator;
@@ -97,10 +98,20 @@ test('it can hit the real endpoint and return a dto', function (): void {
         $_ENV['GOOGLE_REGION'],
     );
 
+    $connector->authenticate(
+        new TokenAuthenticator($tokenResponse->accessToken)
+    );
+
+    $connector->sender()->getHandlerStack()->push(
+        GuzzleRetryMiddleware::factory([
+            'max_retry_attempts' => 5,
+            'retry_on_status' => [429],
+        ])
+    );
+
+
     $service = new GoogleAIPlatformService(
-        $connector->authenticate(
-            new TokenAuthenticator($tokenResponse->accessToken)
-        )
+        $connector
     );
 
     // Act
@@ -156,10 +167,19 @@ test('it can work with non-text input', function (): void {
         $_ENV['GOOGLE_REGION'],
     );
 
+    $connector->authenticate(
+        new TokenAuthenticator($tokenResponse->accessToken)
+    );
+
+    $connector->sender()->getHandlerStack()->push(
+        GuzzleRetryMiddleware::factory([
+            'max_retry_attempts' => 5,
+            'retry_on_status' => [429],
+        ])
+    );
+
     $service = new GoogleAIPlatformService(
-        $connector->authenticate(
-            new TokenAuthenticator($tokenResponse->accessToken)
-        )
+        $connector
     );
 
     // Act

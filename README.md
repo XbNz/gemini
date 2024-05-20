@@ -204,6 +204,45 @@ class SomeCommand
 }
 ````
 
+### Retrying failed requests
+When using free Gemini models, strict rate limits are imposed. You may decide to retry when 429 responses are encountered.
+#### Prerequisites
+A Guzzle retry middleware is not provided. You may implement your own or use a library of your choice. Example:
+```bash
+composer require caseyamcl/guzzle_retry_middleware
+```
+
+
+```php
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->bind(AIPlatformInterface::class, function (Application $app) {
+            $connector = new AIPlatformConnector;
+            $connector->authenticator(...)
+            $connector->sender()->getHandlerStack()->push(
+                GuzzleRetryMiddleware::factory([
+                    'max_retry_attempts' => 5,
+                    'retry_on_status' => [429],
+                ])
+            )
+        
+            return new AIPlatformService(
+                $connector
+                $app->make(LoggerInterface::class)
+            );
+        });
+    }
+}
+    
+}
+```
+
 ## Testing
 This library provides fake implementations for testing purposes. For example, you may use the `GoogleOAuth2ServiceFake::class` like so:
 ### Calling code
