@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    environment: CI
     strategy:
       fail-fast: false
       matrix:
