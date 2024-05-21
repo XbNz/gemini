@@ -37,8 +37,8 @@ composer require xbnz/gemini
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Foundation\Application;use XbNz\Gemini\OAuth2\Saloon\Connectors\GoogleOAuthConnector;
+use Carbon\CarbonImmutable;use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Foundation\Application;use XbNz\Gemini\OAuth2\Saloon\Connectors\GoogleOAuthConnector;use XbNz\Gemini\OAuth2\ValueObjects\GoogleServiceAccount;
 
 clsss AppServiceProvider extends ServiceProvider
 {
@@ -53,7 +53,21 @@ clsss AppServiceProvider extends ServiceProvider
         
         $this->app->bind(AIPlatformInterface::class, function (Application $app) {
             return new AIPlatformService(
-                (new AIPlatformConnector)
+                (new AIPlatformConnector)->authenticator(
+                    new TokenAuthenticator(
+                        $app->make(GoogleOAuth2Interface::class)->token(
+                            new TokenRequestDTO(
+                                new GoogleServiceAccount(
+                                    clientEmail: '...',
+                                    privateKey: '...'
+                                ),
+                                scope: 'https://www.googleapis.com/auth/cloud-platform',
+                                issuedAt: CarbonImmutable::now(),
+                                expiration: CarbonImmutable::now()->addHour()
+                            )
+                        )
+                    )
+                )
                 $app->make(LoggerInterface::class)
             );
         });
@@ -61,11 +75,14 @@ clsss AppServiceProvider extends ServiceProvider
 }
 ```
 
-### Using the AIPlatform service
+### Using the AIPlatform service for single or multi-turn conversations 
+
 ```php
 namespace App\Console\Commands;
 
+use Hoa\Math\Combinatorics\Combination\Gamma;
 use XbNz\Gemini\AIPlatform\AIPlatformInterface;
+use XbNz\Gemini\AIPlatform\ValueObjects\BlobPart;
 
 class SomeCommand
 {
@@ -76,14 +93,67 @@ class SomeCommand
     public function handle(): void
     {
         $response = $this->aiPlatformService->generateContent(
-            
+            new GenerateContentRequestDTO(
+                'publishers/google/models/gemini-experimental',
+                Collection::make([
+                    new ContentDTO(
+                        Role::User,
+                        Collection::make([
+                            new TextPart('Explain what is happening in the image'),
+                            new BlobPart(
+                                'image/jpeg',
+                                'base64 image...',
+                            )
+                        ]),
+                    ),
+                    new ContentDTO(
+                        Role::Model,
+                        Collection::make([
+                            new TextPart('Sure! This is an image of a cat.'),
+                        ]),
+                    ),
+                    new ContentDTO(
+                        Role::User,
+                        Collection::make([
+                            new TextPart('What color is the cat?'),
+                        ]),
+                    ),
+                    // and so on...
+                ]),
+                Collection::make([
+                    new SafetySettings(
+                        HarmCategory::HarmCategoryHateSpeech,
+                        SafetyThreshold::BlockOnlyHigh
+                    ),
+                ]),
+                systemInstructions: Collection::make([
+                    new TextPart('Your instructions here...'),
+                ]),
+                generationConfig: new GenerationConfig(...) // Optional
+            );
         )
+        
+        if ($response->finishReason->consideredSuccessful() === false) {
+            // Handle the model not being able to generate content (probably due to unsafe content)
+        }
+        
+        // Do something with the healthy response
+        $response->usage->promptTokenCount;
+        $modelResponse = $response
+            ->content
+            ->sole()
+            ->parts
+            ->sole() // There should only be one TextPart::class in a model response (for now)
+            ->text;
     }
 }
 ````
 
 > [!NOTE]
 > You may new up the classes directly if you don't want to use a dependency injection container
+
+> [!NOTE]
+> You may serialize and store the TextPart::class responses from the model in your database. This will allow you to conduct a persistent chat session with the model, resembling something like teh ChatGPT interface.
 
 ## Core concepts
 ### Extensible authentication
@@ -99,7 +169,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(AIPlatformInterface::class, function (Application $app) {
             return new AIPlatformService(
-                (new AIPlatformConnector)->setAuthenticator(new MyCustomAuthenticator)
+                (new AIPlatformConnector)->authenticator(new MyCustomAuthenticator)
                 $app->make(LoggerInterface::class)
             );
         });
@@ -195,9 +265,13 @@ class SomeCommand
                 $request->headers()->merge([
                     'X-Custom-Header' => 'Value'
                 ]);
+                
+                return $request;
             },
             afterResponse: function (Response $response) {
                 // Return your own DTO or do something with the response
+                
+                return $response;
             }
         )
     }
