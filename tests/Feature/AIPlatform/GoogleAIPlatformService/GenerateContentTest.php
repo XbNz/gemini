@@ -30,7 +30,6 @@ use XbNz\Gemini\OAuth2\GoogleOAuth2Service;
 use XbNz\Gemini\OAuth2\ValueObjects\GoogleServiceAccount;
 
 use function Pest\Faker\fake;
-use const Webmozart\Assert\InvalidArgumentException;
 
 //test('example', function (): void {
 //
@@ -306,6 +305,7 @@ test('before request hook must return request', function (): void {
 
     } catch (InvalidArgumentException) {
         expect(true)->toBeTrue();
+
         return;
     }
 
@@ -346,6 +346,7 @@ test('after response hook works', function (): void {
             $generateContentRequestDto,
             afterResponse: function (Response $response) {
                 expect($response->json('test_key'))->toBe('test_value');
+
                 return $response;
             }
         );
@@ -387,6 +388,7 @@ test('after response hook must return response', function (): void {
         );
     } catch (InvalidArgumentException) {
         expect(true)->toBeTrue();
+
         return;
     }
 
