@@ -82,8 +82,8 @@ test('it can hit the real endpoint and return a dto', function (): void {
 
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'https://www.googleapis.com/auth/cloud-platform',
         CarbonImmutable::now(),
@@ -93,8 +93,8 @@ test('it can hit the real endpoint and return a dto', function (): void {
     $tokenResponse = (new GoogleOAuth2Service())->token($tokenRequestDto);
 
     $connector = new GoogleAIPlatformConnector(
-        $_ENV['GOOGLE_PROJECT_ID'],
-        $_ENV['GOOGLE_REGION'],
+        getenv('GOOGLE_PROJECT_ID'),
+        getenv('GOOGLE_REGION'),
     );
 
     $connector->authenticate(
@@ -150,8 +150,8 @@ test('it can work with non-text input', function (): void {
 
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'https://www.googleapis.com/auth/cloud-platform',
         CarbonImmutable::now(),
@@ -161,8 +161,8 @@ test('it can work with non-text input', function (): void {
     $tokenResponse = (new GoogleOAuth2Service())->token($tokenRequestDto);
 
     $connector = new GoogleAIPlatformConnector(
-        $_ENV['GOOGLE_PROJECT_ID'],
-        $_ENV['GOOGLE_REGION'],
+        getenv('GOOGLE_PROJECT_ID'),
+        getenv('GOOGLE_REGION'),
     );
 
     $connector->authenticate(

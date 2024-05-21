@@ -14,8 +14,8 @@ test('assert token request works', function (): void {
     // Arrange
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'https://www.googleapis.com/auth/cloud-platform',
         CarbonImmutable::now(),
@@ -47,8 +47,8 @@ test('assert token request count works', function (): void {
     // Arrange
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'https://www.googleapis.com/auth/cloud-platform',
         CarbonImmutable::now(),
@@ -70,8 +70,8 @@ test('always return token works', function (): void {
     // Arrange
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'https://www.googleapis.com/auth/cloud-platform',
         CarbonImmutable::now(),

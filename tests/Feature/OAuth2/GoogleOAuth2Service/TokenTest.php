@@ -18,8 +18,8 @@ test('it retrieves a token from google oauth when supplied a service account', f
     // Arrange
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'https://www.googleapis.com/auth/cloud-platform',
         CarbonImmutable::now(),
@@ -50,8 +50,8 @@ test('it throws & logs client, server, and connect level errors that occur using
 
     $tokenRequestDto = new TokenRequestDTO(
         new GoogleServiceAccount(
-            $_ENV['GOOGLE_CLIENT_EMAIL'],
-            $_ENV['GOOGLE_PRIVATE_KEY']
+            getenv('GOOGLE_CLIENT_EMAIL'),
+            getenv('GOOGLE_PRIVATE_KEY')
         ),
         'gibberish-scope',
         CarbonImmutable::now(),
