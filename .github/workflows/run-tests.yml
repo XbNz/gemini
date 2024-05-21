@@ -30,7 +30,7 @@ jobs:
       - name: Execute tests
         env:
           GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
-          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+          GOOGLE_PRIVATE_KEY: "${{ secrets.GOOGLE_PRIVATE_KEY }}"
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
           GOOGLE_REGION: ${{ secrets.GOOGLE_REGION }}
         run: vendor/bin/pest
