@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 use Carbon\CarbonImmutable;
 use ColinODell\PsrTestLogger\TestLogger;
-use CuyZ\Valinor\Mapper\Source\Source;
-use CuyZ\Valinor\MapperBuilder;
 use GuzzleRetry\GuzzleRetryMiddleware;
 use Illuminate\Support\Collection;
 use Saloon\Exceptions\SaloonException;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
-use XbNz\Gemini\AIPlatform\Contracts\PartContract;
+use Saloon\Http\Request;
+use Saloon\Http\Response;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\ContentDTO;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\Requests\GenerateContentRequestDTO;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\Responses\GenerateContentResponseDTO;
@@ -31,6 +30,7 @@ use XbNz\Gemini\OAuth2\GoogleOAuth2Service;
 use XbNz\Gemini\OAuth2\ValueObjects\GoogleServiceAccount;
 
 use function Pest\Faker\fake;
+use const Webmozart\Assert\InvalidArgumentException;
 
 //test('example', function (): void {
 //
@@ -108,7 +108,6 @@ test('it can hit the real endpoint and return a dto', function (): void {
             'retry_on_status' => [429],
         ])
     );
-
 
     $service = new GoogleAIPlatformService(
         $connector
@@ -231,3 +230,165 @@ test('it throws & logs client, server, and connect level errors that occur using
 })->with([
     SaloonException::class => MockResponse::make()->throw(new SaloonException('Fake Saloon exception')),
 ]);
+
+test('before request hook works', function (): void {
+    // Arrange
+    $mockClient = new MockClient([
+        GenerateContentRequest::class => MockResponse::make(status: 200),
+    ]);
+
+    $generateContentRequestDto = new GenerateContentRequestDTO(
+        'gibberish-model',
+        Collection::make([
+            new ContentDTO(
+                Role::User,
+                Collection::make([
+                    new TextPart('This is a test'),
+                ]),
+            ),
+        ]),
+    );
+
+    $service = new GoogleAIPlatformService(
+        (new GoogleAIPlatformConnector('gibberish', 'gibberish'))->withMockClient($mockClient),
+    );
+
+    // Act
+    try {
+        $service->generateContent(
+            $generateContentRequestDto,
+            beforeRequest: function (GenerateContentRequest $request) {
+                $request->headers()->add('X-Test', 'test');
+
+                return $request;
+            }
+        );
+    } catch (Throwable) {
+    }
+
+    // Assert
+    $mockClient->assertSentCount(1);
+    $mockClient->assertSent(function (Request $request) {
+        return $request->headers()->get('X-Test') === 'test';
+    });
+});
+
+test('before request hook must return request', function (): void {
+    // Arrange
+    $mockClient = new MockClient([
+        GenerateContentRequest::class => MockResponse::make(status: 200),
+    ]);
+
+    $generateContentRequestDto = new GenerateContentRequestDTO(
+        'gibberish-model',
+        Collection::make([
+            new ContentDTO(
+                Role::User,
+                Collection::make([
+                    new TextPart('This is a test'),
+                ]),
+            ),
+        ]),
+    );
+
+    $service = new GoogleAIPlatformService(
+        (new GoogleAIPlatformConnector('gibberish', 'gibberish'))->withMockClient($mockClient),
+    );
+
+    // Act
+    try {
+        $service->generateContent(
+            $generateContentRequestDto,
+            beforeRequest: function (GenerateContentRequest $request) {
+                return 'gibberish';
+            }
+        );
+
+    } catch (InvalidArgumentException) {
+        expect(true)->toBeTrue();
+        return;
+    }
+
+    $this->fail('An exception was not thrown');
+});
+
+test('after response hook works', function (): void {
+    // Arrange
+    $mockClient = new MockClient([
+        GenerateContentRequest::class => MockResponse::make(
+            body: [
+                'test_key' => 'test_value',
+            ],
+            status: 200
+        ),
+    ]);
+
+    $generateContentRequestDto = new GenerateContentRequestDTO(
+        'gibberish-model',
+        Collection::make([
+            new ContentDTO(
+                Role::User,
+                Collection::make([
+                    new TextPart('This is a test'),
+                ]),
+            ),
+        ]),
+    );
+
+    $service = new GoogleAIPlatformService(
+        (new GoogleAIPlatformConnector('gibberish', 'gibberish'))->withMockClient($mockClient),
+    );
+
+    // Act & Assert
+
+    try {
+        $service->generateContent(
+            $generateContentRequestDto,
+            afterResponse: function (Response $response) {
+                expect($response->json('test_key'))->toBe('test_value');
+                return $response;
+            }
+        );
+    } catch (TypeError) {
+    }
+});
+
+test('after response hook must return response', function (): void {
+    // Arrange
+    $mockClient = new MockClient([
+        GenerateContentRequest::class => MockResponse::make(
+            status: 200
+        ),
+    ]);
+
+    $generateContentRequestDto = new GenerateContentRequestDTO(
+        'gibberish-model',
+        Collection::make([
+            new ContentDTO(
+                Role::User,
+                Collection::make([
+                    new TextPart('This is a test'),
+                ]),
+            ),
+        ]),
+    );
+
+    $service = new GoogleAIPlatformService(
+        (new GoogleAIPlatformConnector('gibberish', 'gibberish'))->withMockClient($mockClient),
+    );
+
+    // Act
+    try {
+        $service->generateContent(
+            $generateContentRequestDto,
+            afterResponse: function (Response $response) {
+                return 'gibberish';
+            }
+        );
+    } catch (InvalidArgumentException) {
+        expect(true)->toBeTrue();
+        return;
+    }
+
+    $this->fail('An exception was not thrown');
+});

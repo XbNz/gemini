@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace XbNz\Gemini\AIPlatform;
 
+use Closure;
 use Illuminate\Support\Collection;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Saloon\Exceptions\SaloonException;
+use Saloon\Http\Request;
 use Saloon\Http\Response;
+use Webmozart\Assert\Assert;
 use XbNz\Gemini\AIPlatform\Contracts\GoogleAIPlatformInterface;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\ContentDTO;
 use XbNz\Gemini\AIPlatform\DataTransferObjects\Requests\GenerateContentRequestDTO;
@@ -29,12 +32,25 @@ final class GoogleAIPlatformService implements GoogleAIPlatformInterface
     ) {
     }
 
-    public function generateContent(GenerateContentRequestDTO $requestDto): GenerateContentResponseDTO
-    {
+    /**
+     * @param  Closure(GenerateContentRequest): Request|null  $beforeRequest
+     * @param  Closure(Response): Response|null  $afterResponse
+     */
+    public function generateContent(
+        GenerateContentRequestDTO $requestDto,
+        ?Closure $beforeRequest = null,
+        ?Closure $afterResponse = null
+    ): GenerateContentResponseDTO {
+        $request = new GenerateContentRequest($requestDto);
+
+        if ($beforeRequest !== null) {
+            $request = $beforeRequest(clone $request);
+        }
+
+        Assert::isInstanceOf($request, Request::class);
+
         try {
-            $response = $this->connector->send(
-                new GenerateContentRequest($requestDto)
-            )->throw();
+            $response = $this->connector->send($request)->throw();
         } catch (SaloonException $exception) {
             $this->logger->error(
                 'An error occurred while attempting to generate content from Google AI Platform',
@@ -43,6 +59,12 @@ final class GoogleAIPlatformService implements GoogleAIPlatformInterface
 
             throw GoogleAIPlatformException::fromSaloon($exception);
         }
+
+        if ($afterResponse !== null) {
+            $response = $afterResponse(clone $response);
+        }
+
+        Assert::isInstanceOf($response, Response::class);
 
         return new GenerateContentResponseDTO(
             FinishReason::from($response->json('candidates.0.finishReason')),
