@@ -38,38 +38,37 @@ composer require xbnz/gemini
 
 namespace App\Providers;
 
-use Carbon\CarbonImmutable;use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Foundation\Application;use XbNz\Gemini\OAuth2\Saloon\Connectors\GoogleOAuthConnector;use XbNz\Gemini\OAuth2\ValueObjects\GoogleServiceAccount;
-
 clsss AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(GoogleOAuth2Interface::class, function (Application $app) {
+          $this->app->bind(GoogleOAuth2Interface::class, function (Application $app) {
             return new GoogleOAuth2Service(
-                new GoogleOAuthConnector
-                $app->make(LoggerInterface::class)
+                logger: $app->make(LoggerInterface::class)
             );
         });
-        
-        $this->app->bind(AIPlatformInterface::class, function (Application $app) {
-            return new AIPlatformService(
-                (new AIPlatformConnector)->authenticator(
+
+        $this->app->bind(GoogleAIPlatformInterface::class, function (Application $app) {
+            return new GoogleAIPlatformService(
+                (new GoogleAIPlatformConnector(
+                    $app->make('config')->get('services.google_ai_platform.project_id'),
+                    $app->make('config')->get('services.google_ai_platform.region'),
+                ))->authenticate(
                     new TokenAuthenticator(
                         $app->make(GoogleOAuth2Interface::class)->token(
                             new TokenRequestDTO(
-                                new GoogleServiceAccount(
-                                    clientEmail: '...',
-                                    privateKey: '...'
+                                googleServiceAccount: new GoogleServiceAccount(
+                                    $app->make('config')->get('services.google_ai_platform.client_email'),
+                                    $app->make('config')->get('services.google_ai_platform.private_key'),
                                 ),
                                 scope: 'https://www.googleapis.com/auth/cloud-platform',
                                 issuedAt: CarbonImmutable::now(),
                                 expiration: CarbonImmutable::now()->addHour()
                             )
-                        )
+                        )->accessToken
                     )
-                )
-                $app->make(LoggerInterface::class)
+                ),
+                $app->make('log')
             );
         });
     }
@@ -80,10 +79,6 @@ clsss AppServiceProvider extends ServiceProvider
 
 ```php
 namespace App\Console\Commands;
-
-use Hoa\Math\Combinatorics\Combination\Gamma;
-use XbNz\Gemini\AIPlatform\AIPlatformInterface;
-use XbNz\Gemini\AIPlatform\ValueObjects\BlobPart;
 
 class SomeCommand
 {
@@ -105,7 +100,7 @@ class SomeCommand
                                 'image/jpeg',
                                 'base64 image...',
                             )
-                        ]),
+                        ])
                     ),
                     new ContentDTO(
                         Role::Model,
@@ -120,19 +115,19 @@ class SomeCommand
                         ]),
                     ),
                     // and so on...
-                ]),
+                ])
                 Collection::make([
-                    new SafetySettings(
-                        HarmCategory::HarmCategoryHateSpeech,
-                        SafetyThreshold::BlockOnlyHigh
-                    ),
+                    new SafetySettings(HarmCategory::HarmCategoryHarassment, SafetyThreshold::BlockOnlyHigh),
+                    new SafetySettings(HarmCategory::HarmCategoryHateSpeech, SafetyThreshold::BlockOnlyHigh),
+                    new SafetySettings(HarmCategory::HarmCategorySexuallyExplicit, SafetyThreshold::BlockOnlyHigh),
+                    new SafetySettings(HarmCategory::HarmCategoryDangerousContent, SafetyThreshold::BlockOnlyHigh),
                 ]),
                 systemInstructions: Collection::make([
                     new TextPart('Your instructions here...'),
                 ]),
                 generationConfig: new GenerationConfig(...) // Optional
-            );
-        )
+            )
+        );
         
         if ($response->finishReason->consideredSuccessful() === false) {
             // Handle the model not being able to generate content (probably due to unsafe content)
@@ -142,9 +137,8 @@ class SomeCommand
         $response->usage->promptTokenCount;
         $modelResponse = $response
             ->content
-            ->sole()
             ->parts
-            ->sole() // There should only be one TextPart::class in a model response (for now)
+            ->sole(fn(PartContract $part) => $part instanceof TextPart) // There should only be one TextPart::class in a model response (for now)
             ->text;
     }
 }
@@ -162,16 +156,13 @@ The Google `aiplatform.googleapis.com` API allows several forms of authenticatio
 ```php
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(AIPlatformInterface::class, function (Application $app) {
-            return new AIPlatformService(
-                (new AIPlatformConnector)->authenticator(new MyCustomAuthenticator)
-                $app->make(LoggerInterface::class)
+        $this->app->bind(GoogleAIPlatformInterface::class, function (Application $app) {
+            return new GoogleAIPlatformService(
+                (new GoogleAIPlatformConnector(...))->authenticate(new MyCustomAuthenticator),
             );
         });
     }
@@ -186,27 +177,34 @@ This package does not provide a caching mechanism – for example using the PSR 
 ```php
 namespace App\Providers;
 
-use Illuminate\Contracts\Cache\Repository;use Illuminate\Support\ServiceProvider;use Saloon\Http\Auth\TokenAuthenticator;use XbNz\Gemini\AIPlatform\Contracts\GoogleAIPlatformInterface;use XbNz\Gemini\AIPlatform\GoogleAIPlatformService;use XbNz\Gemini\AIPlatform\Saloon\Connectors\GoogleAIPlatformConnector;use XbNz\Gemini\OAuth2\DataTransferObjects\Requests\TokenRequestDTO;
-
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(GoogleAIPlatformInterface::class, function (Application $app) {
+          $this->app->bind(GoogleAIPlatformInterface::class, function (Application $app) {
             return new GoogleAIPlatformService(
-                new GoogleAIPlatformConnector->authenticator(
+                (new GoogleAIPlatformConnector(...))->authenticate(
                     new TokenAuthenticator(
-                        $app->make(Repository::class)->remember('google_aiplatform_token', 3600, function () use ($app) {
-                            return $app->make(GoogleOAuth2Interface::class)->token(
-                                new TokenRequestDTO(
-                                    ...
-                                    // Ensure the expiry matches the cache duration
-                                )
-                            );
-                        })
+                        $app->make('cache')->remember(
+                            'google_api_platform_token',
+                            CarbonImmutable::now()->addMinutes(60),
+                            function () use ($app) {
+                                return $app->make(GoogleOAuth2Interface::class)->token(
+                                    new TokenRequestDTO(
+                                        googleServiceAccount: new GoogleServiceAccount(
+                                            $app->make('config')->get('services.google_ai_platform.client_email'),
+                                            $app->make('config')->get('services.google_ai_platform.private_key'),
+                                        ),
+                                        scope: 'https://www.googleapis.com/auth/cloud-platform',
+                                        issuedAt: CarbonImmutable::now(),
+                                        expiration: CarbonImmutable::now()->addHour()
+                                    )
+                                )->accessToken;
+                            }
+                        ),
                     )
-                )
-                $app->make(LoggerInterface::class)
+                ),
+                $app->make('log')
             );
         });
     }
@@ -221,12 +219,12 @@ This library uses the PSR logger interface for logging. You may provide your own
 ```php
 namespace App\Console\Commands;
 
-use XbNz\Gemini\AIPlatform\Exceptions\GoogleAIPlatformException;class SomeCommand
+class SomeCommand
 {
     public function handle(): void
     {
-        $service = new AIPlatformService(
-            new AIPlatformConnector,
+        $service = new GoogleAIPlatformService(
+            new GoogleAIPlatformConnector(...),
             new MyCustomLogger
         );
         
@@ -247,10 +245,6 @@ This is not recommended for basic use cases. However, APIs change and maintainer
 
 ```php
 namespace App\Console\Commands;
-
-use Saloon\Http\Request;
-use Saloon\Http\Response;
-use XbNz\Gemini\AIPlatform\Contracts\GoogleAIPlatformInterface;
 
 class SomeCommand
 {
@@ -290,15 +284,13 @@ composer require caseyamcl/guzzle_retry_middleware
 ```php
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(AIPlatformInterface::class, function (Application $app) {
-            $connector = new AIPlatformConnector;
-            $connector->authenticator(...)
+        $this->app->bind(GoogleAIPlatformInterface::class, function (Application $app) {
+            $connector = new GoogleAIPlatformConnector(...);
+            $connector->authenticate(...)
             $connector->sender()->getHandlerStack()->push(
                 GuzzleRetryMiddleware::factory([
                     'max_retry_attempts' => 5,
@@ -306,9 +298,8 @@ class AppServiceProvider extends ServiceProvider
                 ])
             )
         
-            return new AIPlatformService(
+            return new GoogleAIPlatformService(
                 $connector
-                $app->make(LoggerInterface::class)
             );
         });
     }
@@ -321,7 +312,7 @@ class AppServiceProvider extends ServiceProvider
 This library provides fake implementations for testing purposes. For example, you may use the `GoogleOAuth2ServiceFake::class` like so:
 ### Calling code
 ```php
-// Laravel example
+
 namespace App\Console\Commands;
 
 use XbNz\Gemini\OAuth2\GoogleOAuth2Interface;
@@ -368,4 +359,4 @@ class SomeCommandTest extends TestCase
 ```
 
 > [!NOTE]
-> The same concept can be applied to the AIPlatform service. The fake implementation is called `GoogleAIPlatformServiceFake::class`
+> The same concept can be applied to the AIPlatform service. The fake implementation is called `GoogleAIPlatformServiceFake::class` and provides similar test assertions
