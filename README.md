@@ -42,7 +42,7 @@ clsss AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-          $this->app->bind(GoogleOAuth2Interface::class, function (Application $app) {
+        $this->app->bind(GoogleOAuth2Interface::class, function (Application $app) {
             return new GoogleOAuth2Service(
                 logger: $app->make(LoggerInterface::class)
             );
@@ -303,8 +303,6 @@ class AppServiceProvider extends ServiceProvider
             );
         });
     }
-}
-    
 }
 ```
 
