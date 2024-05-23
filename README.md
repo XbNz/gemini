@@ -31,6 +31,9 @@ composer require xbnz/gemini
 
 ## Getting started
 
+### Sample application
+Here is a [sample Laravel command](https://github.com/XbNz/gemini-example/blob/main/app/Console/Commands/GeminiCommand.php) that uses this library. The [service provider](https://github.com/XbNz/gemini-example/blob/main/app/Providers/AppServiceProvider.php) is where the interfaces are bound to concretes.
+
 ### Registering to the dependency injection container (optional)
 
 ```php
