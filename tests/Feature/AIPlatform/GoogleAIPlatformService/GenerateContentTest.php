@@ -6,6 +6,7 @@ use Carbon\CarbonImmutable;
 use ColinODell\PsrTestLogger\TestLogger;
 use GuzzleRetry\GuzzleRetryMiddleware;
 use Illuminate\Support\Collection;
+use Psl\Type\Exception\CoercionException;
 use Saloon\Exceptions\SaloonException;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Faking\MockClient;
@@ -30,32 +31,6 @@ use XbNz\Gemini\OAuth2\GoogleOAuth2Service;
 use XbNz\Gemini\OAuth2\ValueObjects\GoogleServiceAccount;
 
 use function Pest\Faker\fake;
-
-//test('example', function (): void {
-//
-//    $json = '';
-//
-//    $t = (new MapperBuilder())
-//        ->allowSuperfluousKeys()
-//        ->infer(
-//            PartContract::class,
-//            fn () => TextPart::class
-//        )
-//        ->mapper()
-//        ->map(
-//            GenerateContentResponseDTO::class,
-//            Source::array(json_decode($json, true))
-//                ->map([
-//                    'candidates.*.content' => 'content',
-//                    'candidates.*.content.role' => 'content.role',
-//                    'candidates.*.content.parts' => 'content.parts',
-//                    'finishReason' => 'candidates.*.content.parts',
-//                    'usageMetadata' => 'usage',
-//                ])
-//        );
-//
-//    dd($t);
-//});
 
 test('it can hit the real endpoint and return a dto', function (): void {
     // Arrange
@@ -350,7 +325,7 @@ test('after response hook works', function (): void {
                 return $response;
             }
         );
-    } catch (TypeError) {
+    } catch (CoercionException) {
     }
 });
 

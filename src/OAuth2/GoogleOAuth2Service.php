@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace XbNz\Gemini\OAuth2;
 
 use Carbon\CarbonInterval;
-use CuyZ\Valinor\Mapper\Object\DynamicConstructor;
-use CuyZ\Valinor\Mapper\Source\Source;
-use CuyZ\Valinor\MapperBuilder;
 use Firebase\JWT\JWT;
+use Psl\Type;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -53,18 +51,17 @@ final class GoogleOAuth2Service implements GoogleOAuth2Interface
             throw GoogleOAuthException::fromSaloon($exception);
         }
 
-        return (new MapperBuilder())
-            ->registerConstructor(
-                #[DynamicConstructor]
-                function (string $className, int $value): CarbonInterval {
-                    return CarbonInterval::createFromFormat('s', (string) $value);
-                }
-            )
-            ->mapper()
-            ->map(
-                TokenResponseDTO::class,
-                Source::json((string) $response->getPsrResponse()->getBody())->camelCaseKeys()
-            );
+        $validatedResponse = Type\shape([
+            'access_token' => Type\non_empty_string(),
+            'expires_in' => Type\positive_int(),
+            'token_type' => Type\non_empty_string(),
+        ])->coerce($response->json());
+
+        return new TokenResponseDTO(
+            $validatedResponse['access_token'],
+            CarbonInterval::seconds($validatedResponse['expires_in']),
+            $validatedResponse['token_type']
+        );
     }
 
     /**

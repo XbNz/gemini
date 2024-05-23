@@ -6,6 +6,7 @@ namespace XbNz\Gemini\AIPlatform;
 
 use Closure;
 use Illuminate\Support\Collection;
+use Psl\Type;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Saloon\Exceptions\SaloonException;
@@ -66,18 +67,39 @@ final class GoogleAIPlatformService implements GoogleAIPlatformInterface
 
         Assert::isInstanceOf($response, Response::class);
 
+        $validatedResponse = Type\shape([
+            'candidates' => Type\shape([
+                0 => Type\shape([
+                    'finishReason' => Type\backed_enum(FinishReason::class),
+                    'content' => Type\optional(Type\shape([
+                        'role' => Type\backed_enum(Role::class),
+                        'parts' => Type\shape([
+                            0 => Type\shape([
+                                'text' => Type\string(),
+                            ]),
+                        ]),
+                    ])),
+                ]),
+            ]),
+            'usageMetadata' => Type\shape([
+                'promptTokenCount' => Type\int(),
+                'totalTokenCount' => Type\int(),
+                'candidatesTokenCount' => Type\optional(Type\int()),
+            ]),
+        ])->coerce($response->json());
+
         return new GenerateContentResponseDTO(
-            FinishReason::from($response->json('candidates.0.finishReason')),
+            $validatedResponse['candidates'][0]['finishReason'],
             new Usage(
-                $response->json('usageMetadata.promptTokenCount'),
-                $response->json('usageMetadata.totalTokenCount'),
-                $response->json('usageMetadata.candidatesTokenCount') ?? null,
+                $validatedResponse['usageMetadata']['promptTokenCount'],
+                $validatedResponse['usageMetadata']['totalTokenCount'],
+                $validatedResponse['usageMetadata']['candidatesTokenCount'] ?? null
             ),
-            $response->json('candidates.0.content', null) !== null
+            array_key_exists('content', $validatedResponse['candidates'][0])
                 ? new ContentDTO(
-                    Role::from($response->json('candidates.0.content.role')),
+                    $validatedResponse['candidates'][0]['content']['role'],
                     new Collection([
-                        new TextPart($response->json('candidates.0.content.parts.0.text')),
+                        new TextPart($validatedResponse['candidates'][0]['content']['parts'][0]['text']),
                     ])
                 )
                 : null

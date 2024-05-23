@@ -9,11 +9,6 @@ namespace XbNz\Gemini\AIPlatform\ValueObjects;
  */
 final readonly class Usage
 {
-    /**
-     * @param  positive-int  $promptTokenCount
-     * @param  positive-int  $totalTokenCount
-     * @param  positive-int|null  $candidatesTokenCount
-     */
     public function __construct(
         public int $promptTokenCount,
         public int $totalTokenCount,
