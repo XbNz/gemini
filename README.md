@@ -5,9 +5,9 @@
 
 # Google Gemini API client with OAuth2 authentication
 ## Motivation
-Other libraries relied on the generativelanguage.googleapis.com API, which misses some models. For example, the newly-introduced "Gemini Experimental" model, which is free (!) cannot be accessed through that API. This library solves that issue. 
+Other libraries rely on the `generativelanguage.googleapis.com` API, which misses some models. For example, the newly-introduced "Gemini Experimental" model, which is free (!) cannot be accessed through that API. This library solves that issue. 
 > [!NOTE]
-> The Gemini Experimental API is not guaranteed to last forever. If you are using a model that is available using the generativelanguage.googleapis.com API, you should use one of the other PHP libraries that are based on that
+> The Gemini Experimental API is not guaranteed to last forever. If you are using a model that is available on the `generativelanguage.googleapis.com` API, you can use this library to access it as well.
 
 ## Installation
 ```bash
