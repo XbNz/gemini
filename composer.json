@@ -9,6 +9,15 @@
             "email": "fdwnct@gmail.com"
         }
     ],
+    "keywords": [
+        "google",
+        "gemini",
+        "api",
+        "ai",
+        "aiplatform",
+        "experimental",
+        "aiplatform.googleapis.com"
+    ],
     "minimum-stability": "stable",
     "require": {
         "php": "^8.3",
