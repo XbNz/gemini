@@ -11,8 +11,7 @@ class GoogleAIPlatformConnector extends Connector
     public function __construct(
         private readonly string $projectId,
         private readonly string $region = 'us-central1'
-    ) {
-    }
+    ) {}
 
     public function resolveBaseUrl(): string
     {

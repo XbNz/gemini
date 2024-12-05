@@ -30,8 +30,7 @@ final class GoogleAIPlatformService implements GoogleAIPlatformInterface
     public function __construct(
         private GoogleAIPlatformConnector $connector,
         private readonly LoggerInterface $logger = new NullLogger()
-    ) {
-    }
+    ) {}
 
     /**
      * @param  Closure(GenerateContentRequest): Request|null  $beforeRequest

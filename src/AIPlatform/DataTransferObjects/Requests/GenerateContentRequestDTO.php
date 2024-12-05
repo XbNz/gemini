@@ -27,6 +27,5 @@ final readonly class GenerateContentRequestDTO
         public Collection $safetySettings = new Collection(),
         public Collection $systemInstructions = new Collection(),
         public ?GenerationConfig $generationConfig = null,
-    ) {
-    }
+    ) {}
 }

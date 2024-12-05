@@ -15,8 +15,7 @@ final readonly class BlobPart implements PartContract
     public function __construct(
         public string $mimeType,
         public string $data
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<non-empty-string, array<non-empty-string, non-empty-string>>

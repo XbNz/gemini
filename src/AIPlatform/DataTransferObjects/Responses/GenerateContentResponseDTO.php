@@ -17,6 +17,5 @@ final readonly class GenerateContentResponseDTO
         public FinishReason $finishReason,
         public Usage $usage,
         public ?ContentDTO $content = null,
-    ) {
-    }
+    ) {}
 }

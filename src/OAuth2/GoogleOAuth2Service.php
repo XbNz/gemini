@@ -23,8 +23,7 @@ final class GoogleOAuth2Service implements GoogleOAuth2Interface
     public function __construct(
         private readonly GoogleOAuthConnector $connector = new GoogleOAuthConnector(),
         private readonly LoggerInterface $logger = new NullLogger()
-    ) {
-    }
+    ) {}
 
     /**
      * @throws ClientExceptionInterface

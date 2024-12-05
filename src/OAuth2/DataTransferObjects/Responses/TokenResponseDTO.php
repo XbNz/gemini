@@ -16,6 +16,5 @@ final class TokenResponseDTO
         public string $accessToken,
         public CarbonInterval $expiresIn,
         public string $tokenType,
-    ) {
-    }
+    ) {}
 }

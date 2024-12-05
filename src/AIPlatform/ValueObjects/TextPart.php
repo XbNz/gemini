@@ -10,8 +10,7 @@ final readonly class TextPart implements PartContract
 {
     public function __construct(
         public string $text
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, string>

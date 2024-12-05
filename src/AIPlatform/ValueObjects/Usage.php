@@ -13,6 +13,5 @@ final readonly class Usage
         public int $promptTokenCount,
         public int $totalTokenCount,
         public ?int $candidatesTokenCount,
-    ) {
-    }
+    ) {}
 }

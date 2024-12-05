@@ -13,6 +13,5 @@ final readonly class GoogleServiceAccount
         public string $clientEmail,
         #[SensitiveParameter]
         public string $privateKey,
-    ) {
-    }
+    ) {}
 }

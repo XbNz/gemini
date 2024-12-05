@@ -21,8 +21,7 @@ final class TokenRequest extends Request implements HasBody
     public function __construct(
         private readonly TokenRequestDTO $tokenRequestDTO,
         private readonly string $jwt,
-    ) {
-    }
+    ) {}
 
     public function resolveEndpoint(): string
     {

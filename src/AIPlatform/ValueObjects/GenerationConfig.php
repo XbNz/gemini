@@ -10,6 +10,5 @@ final readonly class GenerationConfig
         public float $temperature,
         public float $topP,
         public float $topK,
-    ) {
-    }
+    ) {}
 }

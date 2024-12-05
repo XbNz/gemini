@@ -15,6 +15,5 @@ final readonly class TokenRequestDTO
         public readonly CarbonImmutable $issuedAt,
         public readonly CarbonImmutable $expiration,
         public readonly string $grantType = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
-    ) {
-    }
+    ) {}
 }

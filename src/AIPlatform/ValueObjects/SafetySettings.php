@@ -12,6 +12,5 @@ final readonly class SafetySettings
     public function __construct(
         public HarmCategory $harmCategory,
         public SafetyThreshold $safetyThreshold,
-    ) {
-    }
+    ) {}
 }

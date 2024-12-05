@@ -23,8 +23,7 @@ class GenerateContentRequest extends Request implements HasBody
 
     public function __construct(
         private readonly GenerateContentRequestDTO $generateContentRequestDTO,
-    ) {
-    }
+    ) {}
 
     public function resolveEndpoint(): string
     {

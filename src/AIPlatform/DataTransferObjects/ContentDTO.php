@@ -16,6 +16,5 @@ final readonly class ContentDTO
     public function __construct(
         public Role $role,
         public Collection $parts
-    ) {
-    }
+    ) {}
 }
