@@ -35,7 +35,7 @@ use function Pest\Faker\fake;
 test('it can hit the real endpoint and return a dto', function (): void {
     // Arrange
     $generateContentRequestDto = new GenerateContentRequestDTO(
-        'publishers/google/models/gemini-experimental',
+        'publishers/google/models/gemini-exp-1206',
         Collection::make([
             new ContentDTO(
                 Role::User,
@@ -96,10 +96,10 @@ test('it can hit the real endpoint and return a dto', function (): void {
 
 test('it can work with non-text input', function (): void {
     // Arrange
-    $image = base64_encode(file_get_contents(fake()->imageUrl(gray: true, word: 'Hey, fellow friends', randomize: false)));
+    $image = base64_encode(file_get_contents('https://fakeimg.pl/600x400/?text=Hey%2C+fellow+friends'));
 
     $generateContentRequestDto = new GenerateContentRequestDTO(
-        'publishers/google/models/gemini-experimental',
+        'publishers/google/models/gemini-exp-1206',
         Collection::make([
             new ContentDTO(
                 Role::User,
@@ -119,7 +119,7 @@ test('it can work with non-text input', function (): void {
             ),
         ]),
         Collection::make([
-            new TextPart("Output format should be: 'The text in the image is is: [extracted text]'. Do not include the square brackets, obviously."),
+            new TextPart("Output format should be: 'The text in the image is: [extracted text]'. Do not include the square brackets, obviously."),
         ])
     );
 

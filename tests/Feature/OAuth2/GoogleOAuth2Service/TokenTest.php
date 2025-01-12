@@ -76,7 +76,3 @@ test('it throws & logs client, server, and connect level errors that occur using
     ->with([
         SaloonException::class => MockResponse::make()->throw(new SaloonException('Fake Saloon exception')),
     ]);
-
-test('example', function () {
-    expect(true)->toBeTrue();
-});
