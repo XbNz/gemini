@@ -13,7 +13,6 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        (new Provider())->register();
 
         if (file_exists(__DIR__.'/../.env.testing')) {
             (new Dotenv())->usePutenv()->load(__DIR__.'/../.env.testing');

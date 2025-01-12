@@ -20,27 +20,26 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "firebase/php-jwt": "^6.10",
-        "saloonphp/saloon": "^3.8",
+        "saloonphp/saloon": "3.10.1",
         "illuminate/collections": "^11.7",
         "nesbot/carbon": "^3.3",
-        "azjezz/psl": "^2.9"
+        "azjezz/psl": "^3.1"
     },
     "require-dev": {
-        "pestphp/pest": "^2.3",
-        "phpstan/phpstan": "^1.1",
-        "phpstan/extension-installer": "^1.3",
+        "pestphp/pest": "^3.7",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/extension-installer": "^1.4",
         "laravel/pint": "^1.1",
-        "infection/infection": "^0.28",
         "symfony/dotenv": "^7.0",
         "symfony/var-dumper": "^7.0",
         "nunomaduro/collision": "^8.1",
         "colinodell/psr-testlogger": "^1.3",
         "fakerphp/faker": "^1.23",
-        "pestphp/pest-plugin-faker": "^2.0",
+        "pestphp/pest-plugin-faker": "^3.0",
         "caseyamcl/guzzle_retry_middleware": "^2.9",
-        "php-standard-library/phpstan-extension": "^1.0"
+        "php-standard-library/phpstan-extension": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -55,8 +54,7 @@
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true,
-            "infection/extension-installer": true
+            "phpstan/extension-installer": true
         }
     }
 }
