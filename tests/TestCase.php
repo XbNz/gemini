@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace XbNz\Gemini\Tests;
 
-use NunoMaduro\Collision\Provider;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Symfony\Component\Dotenv\Dotenv;
 

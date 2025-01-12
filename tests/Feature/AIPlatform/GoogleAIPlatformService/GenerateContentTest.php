@@ -30,8 +30,6 @@ use XbNz\Gemini\OAuth2\DataTransferObjects\Requests\TokenRequestDTO;
 use XbNz\Gemini\OAuth2\GoogleOAuth2Service;
 use XbNz\Gemini\OAuth2\ValueObjects\GoogleServiceAccount;
 
-use function Pest\Faker\fake;
-
 test('it can hit the real endpoint and return a dto', function (): void {
     // Arrange
     $generateContentRequestDto = new GenerateContentRequestDTO(

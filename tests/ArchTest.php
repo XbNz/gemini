@@ -11,6 +11,6 @@ test('strict types declaration')
     ->expect('XbNz\Gemini\OAuth2\Saloon\Requests')
     ->toUseStrictTypes();
 
-//test('classes are final')
+// test('classes are final')
 //    ->expect('XbNz\Gemini')
 //    ->toBeFinal();
